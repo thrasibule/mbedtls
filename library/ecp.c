@@ -781,7 +781,7 @@ static int ecp_normalize_jac_many( const mbedtls_ecp_group *grp,
         return( ecp_normalize_jac( grp, *T ) );
 
     if( ( c = mbedtls_calloc( t_len, sizeof( mbedtls_mpi ) ) ) == NULL )
-        return( MBEDTLS_ERR_ECP_ALLOC_FAILED );
+        return( MBEDTLS_ERR_ECP_ALLOC_FAILED ); // LCOV_EXCL_LINE
 
     mbedtls_mpi_init( &u ); mbedtls_mpi_init( &Zi ); mbedtls_mpi_init( &ZZi );
 
@@ -1353,10 +1353,10 @@ static int ecp_mul_comb( mbedtls_ecp_group *grp, mbedtls_ecp_point *R,
     {
         T = mbedtls_calloc( pre_len, sizeof( mbedtls_ecp_point ) );
         if( T == NULL )
-        {
+        { // LCOV_EXCL_START
             ret = MBEDTLS_ERR_ECP_ALLOC_FAILED;
             goto cleanup;
-        }
+        } // LCOV_EXCL_STOP
 
         MBEDTLS_MPI_CHK( ecp_precompute_comb( grp, T, P, w, d ) );
 
@@ -1959,13 +1959,13 @@ int mbedtls_ecp_self_test( int verbose )
         if( add_count != add_c_prev ||
             dbl_count != dbl_c_prev ||
             mul_count != mul_c_prev )
-        {
+        { // LCOV_EXCL_START
             if( verbose != 0 )
                 mbedtls_printf( "failed (%u)\n", (unsigned int) i );
 
             ret = 1;
             goto cleanup;
-        }
+        } // LCOV_EXCL_STOP
     }
 
     if( verbose != 0 )
@@ -1996,13 +1996,13 @@ int mbedtls_ecp_self_test( int verbose )
         if( add_count != add_c_prev ||
             dbl_count != dbl_c_prev ||
             mul_count != mul_c_prev )
-        {
+        { // LCOV_EXCL_START
             if( verbose != 0 )
                 mbedtls_printf( "failed (%u)\n", (unsigned int) i );
 
             ret = 1;
             goto cleanup;
-        }
+        } // LCOV_EXCL_STOP
     }
 
     if( verbose != 0 )

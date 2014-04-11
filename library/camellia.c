@@ -936,12 +936,12 @@ int mbedtls_camellia_self_test( int verbose )
         mbedtls_camellia_crypt_ecb( &ctx, v, src, buf );
 
         if( memcmp( buf, dst, 16 ) != 0 )
-        {
+        { // LCOV_EXCL_START
             if( verbose != 0 )
                 mbedtls_printf( "failed\n" );
 
             return( 1 );
-        }
+        } // LCOV_EXCL_STOP
     }
 
     if( verbose != 0 )
@@ -989,12 +989,12 @@ int mbedtls_camellia_self_test( int verbose )
         mbedtls_camellia_crypt_cbc( &ctx, v, 16, iv, src, buf );
 
         if( memcmp( buf, dst, 16 ) != 0 )
-        {
+        { // LCOV_EXCL_START
             if( verbose != 0 )
                 mbedtls_printf( "failed\n" );
 
             return( 1 );
-        }
+        } // LCOV_EXCL_STOP
     }
 
         if( verbose != 0 )
@@ -1033,12 +1033,12 @@ int mbedtls_camellia_self_test( int verbose )
                                 buf, buf );
 
             if( memcmp( buf, camellia_test_ctr_pt[u], len ) != 0 )
-            {
+            { // LCOV_EXCL_START
                 if( verbose != 0 )
                     mbedtls_printf( "failed\n" );
 
                 return( 1 );
-            }
+            } // LCOV_EXCL_STOP
         }
         else
         {
@@ -1049,12 +1049,12 @@ int mbedtls_camellia_self_test( int verbose )
                                 buf, buf );
 
             if( memcmp( buf, camellia_test_ctr_ct[u], len ) != 0 )
-            {
+            { // LCOV_EXCL_START
                 if( verbose != 0 )
                     mbedtls_printf( "failed\n" );
 
                 return( 1 );
-            }
+            } // LCOV_EXCL_STOP
         }
 
         if( verbose != 0 )

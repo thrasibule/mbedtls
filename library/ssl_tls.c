@@ -170,7 +170,7 @@ static int ssl_session_copy( mbedtls_ssl_session *dst, const mbedtls_ssl_session
 
         dst->peer_cert = mbedtls_calloc( 1, sizeof(mbedtls_x509_crt) );
         if( dst->peer_cert == NULL )
-            return( MBEDTLS_ERR_SSL_ALLOC_FAILED );
+            return( MBEDTLS_ERR_SSL_ALLOC_FAILED ); // LCOV_EXCL_LINE
 
         mbedtls_x509_crt_init( dst->peer_cert );
 
@@ -189,7 +189,7 @@ static int ssl_session_copy( mbedtls_ssl_session *dst, const mbedtls_ssl_session
     {
         dst->ticket = mbedtls_calloc( 1, src->ticket_len );
         if( dst->ticket == NULL )
-            return( MBEDTLS_ERR_SSL_ALLOC_FAILED );
+            return( MBEDTLS_ERR_SSL_ALLOC_FAILED ); // LCOV_EXCL_LINE
 
         memcpy( dst->ticket, src->ticket, src->ticket_len );
     }
@@ -560,10 +560,10 @@ int mbedtls_ssl_derive_keys( mbedtls_ssl_context *ssl )
     else
 #endif
 #endif /* MBEDTLS_SSL_PROTO_TLS1_2 */
-    {
+    { // LCOV_EXCL_START
         MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
         return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-    }
+    } // LCOV_EXCL_STOP
 
     /*
      * SSLv3:
@@ -759,10 +759,10 @@ int mbedtls_ssl_derive_keys( mbedtls_ssl_context *ssl )
             }
             else
 #endif
-            {
+            { // LCOV_EXCL_START
                 MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
                 return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-            }
+            } // LCOV_EXCL_STOP
         }
     }
 
@@ -822,10 +822,10 @@ int mbedtls_ssl_derive_keys( mbedtls_ssl_context *ssl )
     if( ssl->minor_ver == MBEDTLS_SSL_MINOR_VERSION_0 )
     {
         if( transform->maclen > sizeof transform->mac_enc )
-        {
+        { // LCOV_EXCL_START
             MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
             return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-        }
+        } // LCOV_EXCL_STOP
 
         memcpy( transform->mac_enc, mac_enc, transform->maclen );
         memcpy( transform->mac_dec, mac_dec, transform->maclen );
@@ -841,10 +841,10 @@ int mbedtls_ssl_derive_keys( mbedtls_ssl_context *ssl )
     }
     else
 #endif
-    {
+    { // LCOV_EXCL_START
         MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
         return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-    }
+    } // LCOV_EXCL_STOP
 
 #if defined(MBEDTLS_SSL_HW_RECORD_ACCEL)
     if( mbedtls_ssl_hw_record_init != NULL )
@@ -926,11 +926,11 @@ int mbedtls_ssl_derive_keys( mbedtls_ssl_context *ssl )
             MBEDTLS_SSL_DEBUG_MSG( 3, ( "Allocating compression buffer" ) );
             ssl->compress_buf = mbedtls_calloc( 1, MBEDTLS_SSL_BUFFER_LEN );
             if( ssl->compress_buf == NULL )
-            {
+            { // LCOV_EXCL_START
                 MBEDTLS_SSL_DEBUG_MSG( 1, ( "alloc(%d bytes) failed",
                                     MBEDTLS_SSL_BUFFER_LEN ) );
                 return( MBEDTLS_ERR_SSL_ALLOC_FAILED );
-            }
+            } // LCOV_EXCL_STOP
         }
 
         MBEDTLS_SSL_DEBUG_MSG( 3, ( "Initializing zlib states" ) );
@@ -1164,10 +1164,10 @@ int mbedtls_ssl_psk_derive_premaster( mbedtls_ssl_context *ssl, mbedtls_key_exch
     }
     else
 #endif /* MBEDTLS_KEY_EXCHANGE_ECDHE_PSK_ENABLED */
-    {
+    { // LCOV_EXCL_START
         MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
         return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-    }
+    } // LCOV_EXCL_STOP
 
     /* opaque psk<0..2^16-1>; */
     if( end - p < 2 + (int) psk_len )
@@ -1289,10 +1289,10 @@ static int ssl_encrypt_buf( mbedtls_ssl_context *ssl )
         }
         else
 #endif
-        {
+        { // LCOV_EXCL_START
             MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
             return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-        }
+        } // LCOV_EXCL_STOP
 
         MBEDTLS_SSL_DEBUG_BUF( 4, "computed mac",
                        ssl->out_msg + ssl->out_msglen,
@@ -1321,16 +1321,16 @@ static int ssl_encrypt_buf( mbedtls_ssl_context *ssl )
                                    ssl->transform_out->ivlen,
                                    ssl->out_msg, ssl->out_msglen,
                                    ssl->out_msg, &olen ) ) != 0 )
-        {
+        { // LCOV_EXCL_START
             MBEDTLS_SSL_DEBUG_RET( 1, "mbedtls_cipher_crypt", ret );
             return( ret );
-        }
+        } // LCOV_EXCL_STOP
 
         if( ssl->out_msglen != olen )
-        {
+        { // LCOV_EXCL_START
             MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
             return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-        }
+        } // LCOV_EXCL_STOP
     }
     else
 #endif /* MBEDTLS_ARC4_C || MBEDTLS_CIPHER_NULL_CIPHER */
@@ -1406,16 +1406,16 @@ static int ssl_encrypt_buf( mbedtls_ssl_context *ssl )
                                          enc_msg, enc_msglen,
                                          enc_msg, &olen,
                                          enc_msg + enc_msglen, taglen ) ) != 0 )
-        {
+        { // LCOV_EXCL_START
             MBEDTLS_SSL_DEBUG_RET( 1, "mbedtls_cipher_auth_encrypt", ret );
             return( ret );
-        }
+        } // LCOV_EXCL_STOP
 
         if( olen != enc_msglen )
-        {
+        { // LCOV_EXCL_START
             MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
             return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-        }
+        } // LCOV_EXCL_STOP
 
         ssl->out_msglen += taglen;
         auth_done++;
@@ -1482,16 +1482,16 @@ static int ssl_encrypt_buf( mbedtls_ssl_context *ssl )
                                    ssl->transform_out->ivlen,
                                    enc_msg, enc_msglen,
                                    enc_msg, &olen ) ) != 0 )
-        {
+        { // LCOV_EXCL_START
             MBEDTLS_SSL_DEBUG_RET( 1, "mbedtls_cipher_crypt", ret );
             return( ret );
-        }
+        } // LCOV_EXCL_STOP
 
         if( enc_msglen != olen )
-        {
+        { // LCOV_EXCL_START
             MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
             return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-        }
+        } // LCOV_EXCL_STOP
 
 #if defined(MBEDTLS_SSL_PROTO_SSL3) || defined(MBEDTLS_SSL_PROTO_TLS1)
         if( ssl->minor_ver < MBEDTLS_SSL_MINOR_VERSION_2 )
@@ -1542,10 +1542,10 @@ static int ssl_encrypt_buf( mbedtls_ssl_context *ssl )
     else
 #endif /* MBEDTLS_CIPHER_MODE_CBC &&
           ( MBEDTLS_AES_C || MBEDTLS_CAMELLIA_C ) */
-    {
+    { // LCOV_EXCL_START
         MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
         return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-    }
+    } // LCOV_EXCL_STOP
 
     /* Make extra sure authentication was performed, exactly once */
     if( auth_done != 1 )
@@ -1600,16 +1600,16 @@ static int ssl_decrypt_buf( mbedtls_ssl_context *ssl )
                                    ssl->transform_in->ivlen,
                                    ssl->in_msg, ssl->in_msglen,
                                    ssl->in_msg, &olen ) ) != 0 )
-        {
+        { // LCOV_EXCL_START
             MBEDTLS_SSL_DEBUG_RET( 1, "mbedtls_cipher_crypt", ret );
             return( ret );
-        }
+        } // LCOV_EXCL_STOP
 
         if( ssl->in_msglen != olen )
-        {
+        { // LCOV_EXCL_START
             MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
             return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-        }
+        } // LCOV_EXCL_STOP
     }
     else
 #endif /* MBEDTLS_ARC4_C || MBEDTLS_CIPHER_NULL_CIPHER */
@@ -1674,15 +1674,15 @@ static int ssl_decrypt_buf( mbedtls_ssl_context *ssl )
             if( ret == MBEDTLS_ERR_CIPHER_AUTH_FAILED )
                 return( MBEDTLS_ERR_SSL_INVALID_MAC );
 
-            return( ret );
+            return( ret ); // LCOV_EXCL_LINE
         }
         auth_done++;
 
         if( olen != dec_msglen )
-        {
+        { // LCOV_EXCL_START
             MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
             return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-        }
+        } // LCOV_EXCL_STOP
     }
     else
 #endif /* MBEDTLS_GCM_C || MBEDTLS_CCM_C */
@@ -1794,16 +1794,16 @@ static int ssl_decrypt_buf( mbedtls_ssl_context *ssl )
                                    ssl->transform_in->ivlen,
                                    dec_msg, dec_msglen,
                                    dec_msg_result, &olen ) ) != 0 )
-        {
+        { // LCOV_EXCL_START
             MBEDTLS_SSL_DEBUG_RET( 1, "mbedtls_cipher_crypt", ret );
             return( ret );
-        }
+        } // LCOV_EXCL_STOP
 
         if( dec_msglen != olen )
-        {
+        { // LCOV_EXCL_START
             MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
             return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-        }
+        } // LCOV_EXCL_STOP
 
 #if defined(MBEDTLS_SSL_PROTO_SSL3) || defined(MBEDTLS_SSL_PROTO_TLS1)
         if( ssl->minor_ver < MBEDTLS_SSL_MINOR_VERSION_2 )
@@ -1890,20 +1890,20 @@ static int ssl_decrypt_buf( mbedtls_ssl_context *ssl )
         else
 #endif /* MBEDTLS_SSL_PROTO_TLS1 || MBEDTLS_SSL_PROTO_TLS1_1 || \
           MBEDTLS_SSL_PROTO_TLS1_2 */
-        {
+        { // LCOV_EXCL_START
             MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
             return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-        }
+        } // LCOV_EXCL_STOP
 
         ssl->in_msglen -= padlen;
     }
     else
 #endif /* MBEDTLS_CIPHER_MODE_CBC &&
           ( MBEDTLS_AES_C || MBEDTLS_CAMELLIA_C ) */
-    {
+    { // LCOV_EXCL_START
         MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
         return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-    }
+    } // LCOV_EXCL_STOP
 
     MBEDTLS_SSL_DEBUG_BUF( 4, "raw buffer after decryption",
                    ssl->in_msg, ssl->in_msglen );
@@ -1973,10 +1973,10 @@ static int ssl_decrypt_buf( mbedtls_ssl_context *ssl )
         else
 #endif /* MBEDTLS_SSL_PROTO_TLS1 || MBEDTLS_SSL_PROTO_TLS1_1 || \
               MBEDTLS_SSL_PROTO_TLS1_2 */
-        {
+        { // LCOV_EXCL_START
             MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
             return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-        }
+        } // LCOV_EXCL_STOP
 
         MBEDTLS_SSL_DEBUG_BUF( 4, "message  mac", tmp, ssl->transform_in->maclen );
         MBEDTLS_SSL_DEBUG_BUF( 4, "computed mac", ssl->in_msg + ssl->in_msglen,
@@ -3761,8 +3761,10 @@ int mbedtls_ssl_write_certificate( mbedtls_ssl_context *ssl )
         return( 0 );
     }
 
+    // LCOV_EXCL_START
     MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
     return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
+    // LCOV_EXCL_STOP
 }
 
 int mbedtls_ssl_parse_certificate( mbedtls_ssl_context *ssl )
@@ -3780,8 +3782,10 @@ int mbedtls_ssl_parse_certificate( mbedtls_ssl_context *ssl )
         return( 0 );
     }
 
+    // LCOV_EXCL_START
     MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
     return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
+    // LCOV_EXCL_STOP
 }
 #else
 int mbedtls_ssl_write_certificate( mbedtls_ssl_context *ssl )
@@ -4032,11 +4036,11 @@ int mbedtls_ssl_parse_certificate( mbedtls_ssl_context *ssl )
 
     if( ( ssl->session_negotiate->peer_cert = mbedtls_calloc( 1,
                     sizeof( mbedtls_x509_crt ) ) ) == NULL )
-    {
+    { // LCOV_EXCL_START
         MBEDTLS_SSL_DEBUG_MSG( 1, ( "alloc(%d bytes) failed",
                        sizeof( mbedtls_x509_crt ) ) );
         return( MBEDTLS_ERR_SSL_ALLOC_FAILED );
-    }
+    } // LCOV_EXCL_STOP
 
     mbedtls_x509_crt_init( ssl->session_negotiate->peer_cert );
 
@@ -4987,7 +4991,7 @@ static int ssl_handshake_init( mbedtls_ssl_context *ssl )
     if( ssl->handshake == NULL ||
         ssl->transform_negotiate == NULL ||
         ssl->session_negotiate == NULL )
-    {
+    { // LCOV_EXCL_START
         MBEDTLS_SSL_DEBUG_MSG( 1, ( "alloc() of ssl sub-contexts failed" ) );
 
         mbedtls_free( ssl->handshake );
@@ -4999,7 +5003,7 @@ static int ssl_handshake_init( mbedtls_ssl_context *ssl )
         ssl->session_negotiate = NULL;
 
         return( MBEDTLS_ERR_SSL_ALLOC_FAILED );
-    }
+    } // LCOV_EXCL_STOP
 
     /* Initialize structures */
     mbedtls_ssl_session_init( ssl->session_negotiate );
@@ -5076,12 +5080,12 @@ int mbedtls_ssl_setup( mbedtls_ssl_context *ssl,
      */
     if( ( ssl-> in_buf = mbedtls_calloc( 1, len ) ) == NULL ||
         ( ssl->out_buf = mbedtls_calloc( 1, len ) ) == NULL )
-    {
+    { // LCOV_EXCL_START
         MBEDTLS_SSL_DEBUG_MSG( 1, ( "alloc(%d bytes) failed", len ) );
         mbedtls_free( ssl->in_buf );
         ssl->in_buf = NULL;
         return( MBEDTLS_ERR_SSL_ALLOC_FAILED );
-    }
+    } // LCOV_EXCL_STOP
 
 #if defined(MBEDTLS_SSL_PROTO_DTLS)
     if( conf->transport == MBEDTLS_SSL_TRANSPORT_DATAGRAM )
@@ -5386,7 +5390,7 @@ static int ssl_append_key_cert( mbedtls_ssl_key_cert **head,
 
     new = mbedtls_calloc( 1, sizeof( mbedtls_ssl_key_cert ) );
     if( new == NULL )
-        return( MBEDTLS_ERR_SSL_ALLOC_FAILED );
+        return( MBEDTLS_ERR_SSL_ALLOC_FAILED ); // LCOV_EXCL_LINE
 
     new->cert = cert;
     new->key  = key;
@@ -5470,7 +5474,7 @@ int mbedtls_ssl_conf_psk( mbedtls_ssl_config *conf,
     {
         mbedtls_free( conf->psk );
         conf->psk = NULL;
-        return( MBEDTLS_ERR_SSL_ALLOC_FAILED );
+        return( MBEDTLS_ERR_SSL_ALLOC_FAILED ); // LCOV_EXCL_LINE
     }
 
     conf->psk_len = psk_len;
@@ -5598,7 +5602,7 @@ int mbedtls_ssl_set_hostname( mbedtls_ssl_context *ssl, const char *hostname )
     ssl->hostname = mbedtls_calloc( 1, hostname_len + 1 );
 
     if( ssl->hostname == NULL )
-        return( MBEDTLS_ERR_SSL_ALLOC_FAILED );
+        return( MBEDTLS_ERR_SSL_ALLOC_FAILED ); // LCOV_EXCL_LINE
 
     memcpy( ssl->hostname, hostname, hostname_len );
 
@@ -6227,10 +6231,10 @@ int mbedtls_ssl_read( mbedtls_ssl_context *ssl, unsigned char *buf, size_t len )
                 else
 #endif /* MBEDTLS_SSL_PROTO_TLS1 || MBEDTLS_SSL_PROTO_TLS1_1 ||
           MBEDTLS_SSL_PROTO_TLS1_2 */
-                {
+                { // LCOV_EXCL_START
                     MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
                     return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-                }
+                } // LCOV_EXCL_STOP
             }
             else
             {

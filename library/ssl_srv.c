@@ -264,7 +264,7 @@ static int ssl_parse_supported_elliptic_curves( mbedtls_ssl_context *ssl,
         our_size = MBEDTLS_ECP_DP_MAX;
 
     if( ( curves = mbedtls_calloc( our_size, sizeof( *curves ) ) ) == NULL )
-        return( MBEDTLS_ERR_SSL_ALLOC_FAILED );
+        return( MBEDTLS_ERR_SSL_ALLOC_FAILED ); // LCOV_EXCL_LINE
 
     ssl->handshake->curves = curves;
 
@@ -2341,8 +2341,10 @@ static int ssl_write_certificate_request( mbedtls_ssl_context *ssl )
         return( 0 );
     }
 
+    // LCOV_EXCL_START
     MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
     return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
+    // LCOV_EXCL_STOP
 }
 #else
 static int ssl_write_certificate_request( mbedtls_ssl_context *ssl )
@@ -2716,10 +2718,10 @@ curve_matching_done:
             md_alg = mbedtls_ssl_md_alg_from_hash( ssl->handshake->sig_alg );
 
             if( md_alg == MBEDTLS_MD_NONE )
-            {
+            { // LCOV_EXCL_START
                 MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
                 return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-            }
+            } // LCOV_EXCL_STOP
         }
         else
 #endif /* MBEDTLS_SSL_PROTO_TLS1_2 */
@@ -2814,10 +2816,10 @@ curve_matching_done:
         else
 #endif /* MBEDTLS_SSL_PROTO_TLS1 || MBEDTLS_SSL_PROTO_TLS1_1 || \
           MBEDTLS_SSL_PROTO_TLS1_2 */
-        {
+        { // LCOV_EXCL_START
             MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
             return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-        }
+        } // LCOV_EXCL_STOP
 
         MBEDTLS_SSL_DEBUG_BUF( 3, "parameters hash", hash, hashlen != 0 ? hashlen :
             (unsigned int) ( mbedtls_md_get_size( mbedtls_md_info_from_type( md_alg ) ) ) );
@@ -3327,10 +3329,10 @@ static int ssl_parse_client_key_exchange( mbedtls_ssl_context *ssl )
     }
     else
 #endif /* MBEDTLS_KEY_EXCHANGE_RSA_ENABLED */
-    {
+    { // LCOV_EXCL_START
         MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
         return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-    }
+    } // LCOV_EXCL_STOP
 
     if( ( ret = mbedtls_ssl_derive_keys( ssl ) ) != 0 )
     {
@@ -3365,8 +3367,10 @@ static int ssl_parse_certificate_verify( mbedtls_ssl_context *ssl )
         return( 0 );
     }
 
+    // LCOV_EXCL_START
     MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
     return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
+    // LCOV_EXCL_STOP
 }
 #else
 static int ssl_parse_certificate_verify( mbedtls_ssl_context *ssl )
@@ -3490,10 +3494,10 @@ static int ssl_parse_certificate_verify( mbedtls_ssl_context *ssl )
     }
     else
 #endif /* MBEDTLS_SSL_PROTO_TLS1_2 */
-    {
+    { // LCOV_EXCL_START
         MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
         return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-    }
+    } // LCOV_EXCL_STOP
 
     if( i + 2 > ssl->in_hslen )
     {

@@ -110,7 +110,7 @@ int mbedtls_mpi_grow( mbedtls_mpi *X, size_t nblimbs )
     if( X->n < nblimbs )
     {
         if( ( p = mbedtls_calloc( nblimbs, ciL ) ) == NULL )
-            return( MBEDTLS_ERR_MPI_ALLOC_FAILED );
+            return( MBEDTLS_ERR_MPI_ALLOC_FAILED ); // LCOV_EXCL_LINE
 
         if( X->p != NULL )
         {
@@ -148,7 +148,7 @@ int mbedtls_mpi_shrink( mbedtls_mpi *X, size_t nblimbs )
         i = nblimbs;
 
     if( ( p = mbedtls_calloc( i, ciL ) ) == NULL )
-        return( MBEDTLS_ERR_MPI_ALLOC_FAILED );
+        return( MBEDTLS_ERR_MPI_ALLOC_FAILED ); // LCOV_EXCL_LINE
 
     if( X->p != NULL )
     {
@@ -620,7 +620,7 @@ int mbedtls_mpi_write_file( const char *p, const mbedtls_mpi *X, int radix, FILE
     {
         if( fwrite( p, 1, plen, fout ) != plen ||
             fwrite( s, 1, slen, fout ) != slen )
-            return( MBEDTLS_ERR_MPI_FILE_IO_ERROR );
+            return( MBEDTLS_ERR_MPI_FILE_IO_ERROR ); // LCOV_EXCL_LINE
     }
     else
         mbedtls_printf( "%s%s", p, s );
@@ -2233,13 +2233,13 @@ int mbedtls_mpi_self_test( int verbose )
         mbedtls_printf( "  MPI test #1 (mul_mpi): " );
 
     if( mbedtls_mpi_cmp_mpi( &X, &U ) != 0 )
-    {
+    { // LCOV_EXCL_START
         if( verbose != 0 )
             mbedtls_printf( "failed\n" );
 
         ret = 1;
         goto cleanup;
-    }
+    } // LCOV_EXCL_STOP
 
     if( verbose != 0 )
         mbedtls_printf( "passed\n" );
@@ -2259,13 +2259,13 @@ int mbedtls_mpi_self_test( int verbose )
 
     if( mbedtls_mpi_cmp_mpi( &X, &U ) != 0 ||
         mbedtls_mpi_cmp_mpi( &Y, &V ) != 0 )
-    {
+    { // LCOV_EXCL_START
         if( verbose != 0 )
             mbedtls_printf( "failed\n" );
 
         ret = 1;
         goto cleanup;
-    }
+    } // LCOV_EXCL_STOP
 
     if( verbose != 0 )
         mbedtls_printf( "passed\n" );
@@ -2281,13 +2281,13 @@ int mbedtls_mpi_self_test( int verbose )
         mbedtls_printf( "  MPI test #3 (exp_mod): " );
 
     if( mbedtls_mpi_cmp_mpi( &X, &U ) != 0 )
-    {
+    { // LCOV_EXCL_START
         if( verbose != 0 )
             mbedtls_printf( "failed\n" );
 
         ret = 1;
         goto cleanup;
-    }
+    } // LCOV_EXCL_STOP
 
     if( verbose != 0 )
         mbedtls_printf( "passed\n" );
@@ -2303,13 +2303,13 @@ int mbedtls_mpi_self_test( int verbose )
         mbedtls_printf( "  MPI test #4 (inv_mod): " );
 
     if( mbedtls_mpi_cmp_mpi( &X, &U ) != 0 )
-    {
+    { // LCOV_EXCL_START
         if( verbose != 0 )
             mbedtls_printf( "failed\n" );
 
         ret = 1;
         goto cleanup;
-    }
+    } // LCOV_EXCL_STOP
 
     if( verbose != 0 )
         mbedtls_printf( "passed\n" );
@@ -2325,13 +2325,13 @@ int mbedtls_mpi_self_test( int verbose )
         MBEDTLS_MPI_CHK( mbedtls_mpi_gcd( &A, &X, &Y ) );
 
         if( mbedtls_mpi_cmp_int( &A, gcd_pairs[i][2] ) != 0 )
-        {
+        { // LCOV_EXCL_START
             if( verbose != 0 )
                 mbedtls_printf( "failed at %d\n", i );
 
             ret = 1;
             goto cleanup;
-        }
+        } // LCOV_EXCL_STOP
     }
 
     if( verbose != 0 )
@@ -2340,7 +2340,7 @@ int mbedtls_mpi_self_test( int verbose )
 cleanup:
 
     if( ret != 0 && verbose != 0 )
-        mbedtls_printf( "Unexpected error, return code = %08X\n", ret );
+        mbedtls_printf( "Unexpected error, return code = %08X\n", ret ); // LCOV_EXCL_LINE
 
     mbedtls_mpi_free( &A ); mbedtls_mpi_free( &E ); mbedtls_mpi_free( &N ); mbedtls_mpi_free( &X );
     mbedtls_mpi_free( &Y ); mbedtls_mpi_free( &U ); mbedtls_mpi_free( &V );

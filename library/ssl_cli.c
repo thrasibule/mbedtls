@@ -1642,10 +1642,10 @@ static int ssl_check_server_ecdh_params( const mbedtls_ssl_context *ssl )
 
     curve_info = mbedtls_ecp_curve_info_from_grp_id( ssl->handshake->ecdh_ctx.grp.id );
     if( curve_info == NULL )
-    {
+    { // LCOV_EXCL_START
         MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
         return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-    }
+    } // LCOV_EXCL_STOP
 
     MBEDTLS_SSL_DEBUG_MSG( 2, ( "ECDH curve: %s", curve_info->name ) );
 
@@ -2020,10 +2020,10 @@ static int ssl_parse_server_key_exchange( mbedtls_ssl_context *ssl )
 #endif /* MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED ||
           MBEDTLS_KEY_EXCHANGE_ECDHE_PSK_ENABLED ||
           MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED */
-    {
+    { // LCOV_EXCL_START
         MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
         return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-    }
+    } // LCOV_EXCL_STOP
 
 #if defined(MBEDTLS_KEY_EXCHANGE_DHE_RSA_ENABLED) ||                       \
     defined(MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED) ||                     \
@@ -2072,10 +2072,10 @@ static int ssl_parse_server_key_exchange( mbedtls_ssl_context *ssl )
         }
         else
 #endif
-        {
+        { // LCOV_EXCL_START
             MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
             return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-        }
+        } // LCOV_EXCL_STOP
 
         /*
          * Read signature
@@ -2169,10 +2169,10 @@ static int ssl_parse_server_key_exchange( mbedtls_ssl_context *ssl )
         else
 #endif /* MBEDTLS_SSL_PROTO_TLS1 || MBEDTLS_SSL_PROTO_TLS1_1 || \
           MBEDTLS_SSL_PROTO_TLS1_2 */
-        {
+        { // LCOV_EXCL_START
             MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
             return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-        }
+        } // LCOV_EXCL_STOP
 
         MBEDTLS_SSL_DEBUG_BUF( 3, "parameters hash", hash, hashlen != 0 ? hashlen :
             (unsigned int) ( mbedtls_md_get_size( mbedtls_md_info_from_type( md_alg ) ) ) );
@@ -2225,8 +2225,10 @@ static int ssl_parse_certificate_request( mbedtls_ssl_context *ssl )
         return( 0 );
     }
 
+    // LCOV_EXCL_START
     MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
     return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
+    // LCOV_EXCL_STOP
 }
 #else
 static int ssl_parse_certificate_request( mbedtls_ssl_context *ssl )
@@ -2584,10 +2586,10 @@ static int ssl_write_client_key_exchange( mbedtls_ssl_context *ssl )
         }
         else
 #endif /* MBEDTLS_KEY_EXCHANGE_ECDHE_PSK_ENABLED */
-        {
+        { // LCOV_EXCL_START
             MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
             return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-        }
+        } // LCOV_EXCL_STOP
 
         if( ( ret = mbedtls_ssl_psk_derive_premaster( ssl,
                         ciphersuite_info->key_exchange ) ) != 0 )
@@ -2607,11 +2609,11 @@ static int ssl_write_client_key_exchange( mbedtls_ssl_context *ssl )
     }
     else
 #endif /* MBEDTLS_KEY_EXCHANGE_RSA_ENABLED */
-    {
+    { // LCOV_EXCL_START
         ((void) ciphersuite_info);
         MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
         return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-    }
+    } // LCOV_EXCL_STOP
 
     ssl->out_msglen  = i + n;
     ssl->out_msgtype = MBEDTLS_SSL_MSG_HANDSHAKE;
@@ -2657,8 +2659,10 @@ static int ssl_write_certificate_verify( mbedtls_ssl_context *ssl )
         return( 0 );
     }
 
+    // LCOV_EXCL_START
     MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
     return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
+    // LCOV_EXCL_STOP
 }
 #else
 static int ssl_write_certificate_verify( mbedtls_ssl_context *ssl )
@@ -2776,10 +2780,10 @@ static int ssl_write_certificate_verify( mbedtls_ssl_context *ssl )
     }
     else
 #endif /* MBEDTLS_SSL_PROTO_TLS1_2 */
-    {
+    { // LCOV_EXCL_START
         MBEDTLS_SSL_DEBUG_MSG( 1, ( "should never happen" ) );
         return( MBEDTLS_ERR_SSL_INTERNAL_ERROR );
-    }
+    } // LCOV_EXCL_STOP
 
     if( ( ret = mbedtls_pk_sign( mbedtls_ssl_own_key( ssl ), md_alg, hash_start, hashlen,
                          ssl->out_msg + 6 + offset, &n,
@@ -2885,10 +2889,10 @@ static int ssl_parse_new_session_ticket( mbedtls_ssl_context *ssl )
     ssl->session_negotiate->ticket_len = 0;
 
     if( ( ticket = mbedtls_calloc( 1, ticket_len ) ) == NULL )
-    {
+    { // LCOV_EXCL_START
         MBEDTLS_SSL_DEBUG_MSG( 1, ( "ticket alloc failed" ) );
         return( MBEDTLS_ERR_SSL_ALLOC_FAILED );
-    }
+    } // LCOV_EXCL_STOP
 
     memcpy( ticket, msg + 6, ticket_len );
 

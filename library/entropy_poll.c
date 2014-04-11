@@ -167,10 +167,10 @@ int mbedtls_platform_entropy_poll( void *data,
 
     ret = fread( output, 1, len, file );
     if( ret != len )
-    {
+    { // LCOV_EXCL_START
         fclose( file );
         return( MBEDTLS_ERR_ENTROPY_SOURCE_FAILED );
-    }
+    } // LCOV_EXCL_STOP
 
     fclose( file );
     *olen = len;

@@ -415,12 +415,12 @@ int mbedtls_timing_self_test( int verbose )
         millisecs = mbedtls_timing_get_timer( &hires, 0 );
 
         if( millisecs < 900 * secs || millisecs > 1100 * secs )
-        {
+        { // LCOV_EXCL_START
             if( verbose != 0 )
                 mbedtls_printf( "failed\n" );
 
             return( 1 );
-        }
+        } // LCOV_EXCL_STOP
     }
 
     if( verbose != 0 )
@@ -473,12 +473,12 @@ int mbedtls_timing_self_test( int verbose )
 
 hard_test:
     if( hardfail > 1 )
-    {
+    { // LCOV_EXCL_START
         if( verbose != 0 )
             mbedtls_printf( "failed (ignored)\n" );
 
         goto hard_test_done;
-    }
+    } // LCOV_EXCL_STOP
 
     /* Get a reference ratio cycles/ms */
     millisecs = 1;
@@ -497,10 +497,10 @@ hard_test:
         /* Allow variation up to 20% */
         if( cycles / millisecs < ratio - ratio / 5 ||
             cycles / millisecs > ratio + ratio / 5 )
-        {
+        { // LCOV_EXCL_START
             hardfail++;
             goto hard_test;
-        }
+        } // LCOV_EXCL_STOP
     }
 
     if( verbose != 0 )
