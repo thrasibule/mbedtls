@@ -186,7 +186,7 @@ static int ecjpake_zkp_read( const mbedtls_md_info_t *md_info,
                              const mbedtls_ecp_point *G,
                              const mbedtls_ecp_point *X,
                              const char *id,
-                             unsigned char **p,
+                             const unsigned char **p,
                              const unsigned char *end )
 {
     int ret;
@@ -208,8 +208,7 @@ static int ecjpake_zkp_read( const mbedtls_md_info_t *md_info,
     if( end < *p )
         return( MBEDTLS_ERR_ECP_BAD_INPUT_DATA );
 
-    MBEDTLS_MPI_CHK( mbedtls_ecp_tls_read_point( grp, &V,
-                     (const unsigned char **) p, end - *p ) );
+    MBEDTLS_MPI_CHK( mbedtls_ecp_tls_read_point( grp, &V, p, end - *p ) );
 
     if( end < *p || (size_t)( end - *p ) < 1 )
     {
@@ -218,6 +217,7 @@ static int ecjpake_zkp_read( const mbedtls_md_info_t *md_info,
     }
 
     r_len = *(*p)++;
+
     if( end < *p || (size_t)( end - *p ) < r_len )
     {
         ret = MBEDTLS_ERR_ECP_BAD_INPUT_DATA;
@@ -258,7 +258,7 @@ static int ecjpake_kkp_read( const mbedtls_md_info_t *md_info,
                              const mbedtls_ecp_point *G,
                              mbedtls_ecp_point *X,
                              const char *id,
-                             unsigned char **p,
+                             const unsigned char **p,
                              const unsigned char *end )
 {
     int ret;
@@ -272,8 +272,7 @@ static int ecjpake_kkp_read( const mbedtls_md_info_t *md_info,
      *     ECSchnorrZKP zkp;
      * } ECJPAKEKeyKP;
      */
-    MBEDTLS_MPI_CHK( mbedtls_ecp_tls_read_point( grp, X,
-                    (const unsigned char **) p, end - *p ) );
+    MBEDTLS_MPI_CHK( mbedtls_ecp_tls_read_point( grp, X, p, end - *p ) );
     MBEDTLS_MPI_CHK( ecjpake_zkp_read( md_info, grp, G, X, id, p, end ) );
 
 cleanup:
@@ -330,7 +329,7 @@ static int ecjpake_kkpp_read( const mbedtls_md_info_t *md_info,
                               size_t len )
 {
     int ret;
-    unsigned char *p = (unsigned char *) buf;
+    const unsigned char *p = buf;
     const unsigned char *end = buf + len;
 
     /*
