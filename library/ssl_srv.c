@@ -545,7 +545,8 @@ static int ssl_parse_use_srtp_ext( ssl_context *ssl,
                                    const unsigned char *buf, size_t len )
 {
     enum DTLS_SRTP_protection_profiles client_protection = SRTP_UNSET_PROFILE;
-	size_t i,j;
+    size_t i,j;
+    uint16_t profile_length;
 
     /* If use_srtp is not configured, just ignore the extension */
     if( ( ssl->dtls_srtp_profiles_list == NULL ) || ( ssl->dtls_srtp_profiles_list_len == 0 ) )
@@ -564,17 +565,18 @@ static int ssl_parse_use_srtp_ext( ssl_context *ssl,
      * Note: srtp_mki is not supported
      */
 
-    /* Min length is 2 : at least one protection profile */
-    if( len < 2 )
+    /* Min length is 5 : at least one protection profile */
+    if( len < 5 )
         return( MBEDTLS_ERR_SSL_BAD_HS_CLIENT_HELLO );
 
     /*
      * Use our order of preference
      */
+    profile_length = buf[0]<<8|buf[1]; /* first 2 bytes are protection profile length(in bytes) */
     for( i=0; i < ssl->dtls_srtp_profiles_list_len; i++)
     {
-		/* parse the extension list values are listed in http://www.iana.org/assignments/srtp-protection/srtp-protection.xhtml */
-        for( j=0; j<len; j+=2 )
+		/* parse the extension list values are defined in http://www.iana.org/assignments/srtp-protection/srtp-protection.xhtml */
+        for( j=0; j<profile_length; j+=2 )
         {
             uint16_t protection_profile_value = buf[j]<<8 | buf[j+1];
 
@@ -2141,27 +2143,30 @@ static void ssl_write_use_srtp_ext( ssl_context *ssl,
 	/* extension */
     buf[0] = (unsigned char)( ( MBEDTLS_EXT_USE_SRTP >> 8 ) & 0xFF );
     buf[1] = (unsigned char)( ( MBEDTLS_EXT_USE_SRTP      ) & 0xFF );
-	/* length (2: only one profile and srtp_mki not supported) */
+	/* total length (5: only one profile(2 bytes) and length(2 bytes) and srtp_mki not supported so zero length(1 byte) ) */
     buf[2] = 0x00;
-    buf[3] = 0x02;
+    buf[3] = 0x05;
 
+    /* protection profile length: 2 */
+    buf[4] = 0x00;
+    buf[5] = 0x02;
     switch (ssl->chosen_dtls_srtp_profile)
     {
 		case SRTP_AES128_CM_HMAC_SHA1_80:
-        buf[4] = (unsigned char)( ( SRTP_AES128_CM_HMAC_SHA1_80_IANA_VALUE >> 8) & 0xFF );
-        buf[5] = (unsigned char)( ( SRTP_AES128_CM_HMAC_SHA1_80_IANA_VALUE     ) & 0xFF );
+        buf[6] = (unsigned char)( ( SRTP_AES128_CM_HMAC_SHA1_80_IANA_VALUE >> 8) & 0xFF );
+        buf[7] = (unsigned char)( ( SRTP_AES128_CM_HMAC_SHA1_80_IANA_VALUE     ) & 0xFF );
         break;
 		case SRTP_AES128_CM_HMAC_SHA1_32:
-        buf[4] = (unsigned char)( ( SRTP_AES128_CM_HMAC_SHA1_32_IANA_VALUE >> 8) & 0xFF );
-        buf[5] = (unsigned char)( ( SRTP_AES128_CM_HMAC_SHA1_32_IANA_VALUE     ) & 0xFF );
+        buf[6] = (unsigned char)( ( SRTP_AES128_CM_HMAC_SHA1_32_IANA_VALUE >> 8) & 0xFF );
+        buf[7] = (unsigned char)( ( SRTP_AES128_CM_HMAC_SHA1_32_IANA_VALUE     ) & 0xFF );
         break;
 		case SRTP_NULL_HMAC_SHA1_80:
-        buf[4] = (unsigned char)( ( SRTP_NULL_HMAC_SHA1_80_IANA_VALUE >> 8) & 0xFF );
-        buf[5] = (unsigned char)( ( SRTP_NULL_HMAC_SHA1_80_IANA_VALUE     ) & 0xFF );
+        buf[6] = (unsigned char)( ( SRTP_NULL_HMAC_SHA1_80_IANA_VALUE >> 8) & 0xFF );
+        buf[7] = (unsigned char)( ( SRTP_NULL_HMAC_SHA1_80_IANA_VALUE     ) & 0xFF );
         break;
 		case SRTP_NULL_HMAC_SHA1_32:
-        buf[4] = (unsigned char)( ( SRTP_NULL_HMAC_SHA1_32_IANA_VALUE >> 8) & 0xFF );
-        buf[5] = (unsigned char)( ( SRTP_NULL_HMAC_SHA1_32_IANA_VALUE     ) & 0xFF );
+        buf[6] = (unsigned char)( ( SRTP_NULL_HMAC_SHA1_32_IANA_VALUE >> 8) & 0xFF );
+        buf[7] = (unsigned char)( ( SRTP_NULL_HMAC_SHA1_32_IANA_VALUE     ) & 0xFF );
         break;
 		default:
         *olen = 0;
@@ -2169,7 +2174,9 @@ static void ssl_write_use_srtp_ext( ssl_context *ssl,
         break;
     }
 
-    *olen = 6;
+    buf[8] = 0x00; /* unsupported srtp_mki variable length vector set to 0 */
+
+    *olen = 9;
 }
 #endif /* MBEDTLS_SSL_PROTO_DTLS */
 
