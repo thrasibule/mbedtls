@@ -671,6 +671,24 @@ int mbedtls_ssl_derive_keys( mbedtls_ssl_context *ssl )
     MBEDTLS_SSL_DEBUG_BUF( 4, "random bytes", handshake->randbytes, 64 );
     MBEDTLS_SSL_DEBUG_BUF( 4, "key block", keyblk, 256 );
 
+#if defined(MBEDTLS_SSL_PROTO_DTLS)
+	/* check if we have a chosen srtp protection profile */
+    if (ssl->chosen_dtls_srtp_profile != SRTP_UNSET_PROFILE)
+    {
+        /* derive key material for srtp session RFC5764 section 4.2 */
+        /* master key and master salt are respectively 128 bits and 112 bits for all currently available modes :
+         * SRTP_AES128_CM_HMAC_SHA1_80, SRTP_AES128_CM_HMAC_SHA1_32
+         * SRTP_NULL_HMAC_SHA1_80, SRTP_NULL_HMAC_SHA1_32
+         * So we must export 2*(128 + 112) = 480 bytes
+         */
+        ssl->dtls_srtp_keys_len = 480;
+
+        ssl->dtls_srtp_keys = (unsigned char *)polarssl_malloc(ssl->dtls_srtp_keys_len);
+        handshake->tls_prf( session->master, 48, "EXTRACTOR-dtls_srtp",
+                            handshake->randbytes, 64, ssl->dtls_srtp_keys, ssl->dtls_srtp_keys_len );
+    }
+#endif /* MBEDTLS_SSL_PROTO_DTLS */
+
     mbedtls_zeroize( handshake->randbytes, sizeof( handshake->randbytes ) );
 
     /*
@@ -5633,6 +5651,49 @@ const char *mbedtls_ssl_get_alpn_protocol( const mbedtls_ssl_context *ssl )
 }
 #endif /* MBEDTLS_SSL_ALPN */
 
+#if defined(MBEDTLS_SSL_PROTO_DTLS)
+int mbedtls_ssl_set_dtls_srtp_protection_profiles( mbedtls_ssl_context *ssl, const enum DTLS_SRTP_protection_profiles *profiles, size_t profiles_number)
+{
+    size_t i;
+    /* check in put validity : must be a list of profiles from enumeration */
+    /* maximum length is 4 as only 4 protection profiles are defined */
+    if (profiles_number>4) {
+        return MBEDTLS_ERR_SSL_BAD_INPUT_DATA;
+    }
+
+    mbedtls_free(ssl->dtls_srtp_profiles_list);
+    ssl->dtls_srtp_profiles_list = (enum DTLS_SRTP_protection_profiles *)mbedtls_malloc(profiles_number*sizeof(enum DTLS_SRTP_protection_profiles));
+
+    for (i=0; i<profiles_number; i++)
+    {
+        switch (profiles[i])
+        {
+        case SRTP_AES128_CM_HMAC_SHA1_80:
+        case SRTP_AES128_CM_HMAC_SHA1_32:
+        case SRTP_NULL_HMAC_SHA1_80:
+        case SRTP_NULL_HMAC_SHA1_32:
+            ssl->dtls_srtp_profiles_list[i] = profiles[i];
+            break;
+        default:
+            free(ssl->dtls_srtp_profiles_list);
+            ssl->dtls_srtp_profiles_list = NULL;
+            ssl->dtls_srtp_profiles_list_len = 0;
+            return MBEDTLS_ERR_SSL_BAD_INPUT_DATA;
+        }
+    }
+
+    /* assign array length */
+    ssl->dtls_srtp_profiles_list_len = profiles_number;
+
+    return( 0 );
+}
+
+enum DTLS_SRTP_protection_profiles mbedtls_ssl_get_dtls_srtp_protection_profile( const mbedtls_ssl_context *ssl)
+{
+    return( ssl->chosen_dtls_srtp_profile);
+}
+#endif /* MBEDTLS_SSL_PROTO_DTLS */
+
 void mbedtls_ssl_conf_max_version( mbedtls_ssl_config *conf, int major, int minor )
 {
     conf->max_major_ver = major;
@@ -6676,6 +6737,11 @@ void mbedtls_ssl_free( mbedtls_ssl_context *ssl )
     mbedtls_free( ssl->cli_id );
 #endif
 
+#if defined (MBEDTLS_SSL_PROTO_DTLS)
+    mbedtls_free( ssl->dtls_srtp_profiles_list );
+    mbedtls_free( ssl->dtls_srtp_keys );
+#endif
+
     MBEDTLS_SSL_DEBUG_MSG( 2, ( "<= free" ) );
 
     /* Actually clear after last debug message */
@@ -6768,6 +6834,11 @@ int mbedtls_ssl_config_defaults( mbedtls_ssl_config *conf,
 #if defined(MBEDTLS_SSL_PROTO_DTLS)
     conf->hs_timeout_min = MBEDTLS_SSL_DTLS_TIMEOUT_DFL_MIN;
     conf->hs_timeout_max = MBEDTLS_SSL_DTLS_TIMEOUT_DFL_MAX;
+    conf->dtls_srtp_profiles_list = NULL;
+    conf->dtls_srtp_profiles_list_len = 0;
+    conf->chosen_dtls_srtp_profile = SRTP_UNSET_PROFILE;
+    conf->dtls_srtp_keys = NULL;
+    conf->dtls_srtp_keys_len = 0;
 #endif
 
 #if defined(MBEDTLS_SSL_RENEGOTIATION)
