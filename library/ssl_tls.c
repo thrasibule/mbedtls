@@ -637,6 +637,23 @@ int mbedtls_ssl_derive_keys( mbedtls_ssl_context *ssl )
     else
         MBEDTLS_SSL_DEBUG_MSG( 3, ( "no premaster (session resumed)" ) );
 
+#if defined(MBEDTLS_SSL_PROTO_DTLS)
+    /* check if we have a chosen srtp protection profile */
+    if (ssl->chosen_dtls_srtp_profile != SRTP_UNSET_PROFILE) {
+        /* derive key material for srtp session RFC5764 section 4.2 */
+        /* master key and master salt are respectively 128 bits and 112 bits for all currently available modes :
+         * SRTP_AES128_CM_HMAC_SHA1_80, SRTP_AES128_CM_HMAC_SHA1_32
+         * SRTP_NULL_HMAC_SHA1_80, SRTP_NULL_HMAC_SHA1_32
+         * So we must export 2*(128 + 112) = 480 bits
+         */
+        ssl->dtls_srtp_keys_len = 60;
+
+        ssl->dtls_srtp_keys = (unsigned char *)mbedtls_malloc(ssl->dtls_srtp_keys_len);
+        handshake->tls_prf( session->master, 48, "EXTRACTOR-dtls_srtp",
+                            handshake->randbytes, 64, ssl->dtls_srtp_keys, ssl->dtls_srtp_keys_len );
+    }
+#endif /* MBEDTLS_SSL_PROTO_DTLS */
+
     /*
      * Swap the client and server random values.
      */
@@ -671,23 +688,6 @@ int mbedtls_ssl_derive_keys( mbedtls_ssl_context *ssl )
     MBEDTLS_SSL_DEBUG_BUF( 4, "random bytes", handshake->randbytes, 64 );
     MBEDTLS_SSL_DEBUG_BUF( 4, "key block", keyblk, 256 );
 
-#if defined(MBEDTLS_SSL_PROTO_DTLS)
-	/* check if we have a chosen srtp protection profile */
-    if (ssl->chosen_dtls_srtp_profile != SRTP_UNSET_PROFILE)
-    {
-        /* derive key material for srtp session RFC5764 section 4.2 */
-        /* master key and master salt are respectively 128 bits and 112 bits for all currently available modes :
-         * SRTP_AES128_CM_HMAC_SHA1_80, SRTP_AES128_CM_HMAC_SHA1_32
-         * SRTP_NULL_HMAC_SHA1_80, SRTP_NULL_HMAC_SHA1_32
-         * So we must export 2*(128 + 112) = 480 bytes
-         */
-        ssl->dtls_srtp_keys_len = 480;
-
-        ssl->dtls_srtp_keys = (unsigned char *)polarssl_malloc(ssl->dtls_srtp_keys_len);
-        handshake->tls_prf( session->master, 48, "EXTRACTOR-dtls_srtp",
-                            handshake->randbytes, 64, ssl->dtls_srtp_keys, ssl->dtls_srtp_keys_len );
-    }
-#endif /* MBEDTLS_SSL_PROTO_DTLS */
 
     mbedtls_zeroize( handshake->randbytes, sizeof( handshake->randbytes ) );
 
